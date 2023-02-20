@@ -66,29 +66,25 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let channel = content.parse::<Channel>().expect("parse error");
 
-        // Отримуємо останній пост на сайті
         let item = channel.items().get(0).unwrap();
-        // Назва ресурсу
+
         println!("Website:  {}\n", channel.title());
-        // Мова, на якій ресурс
+
         println!(
             "Language: {}\n",
             detect(item.title().unwrap()).unwrap().lang().eng_name()
         );
-        // Заголовок останнього посту
+
         println!("Last post: {} \n", item.title().unwrap());
-        // Тематики посту
+
         println!("Categories: ");
         for category in item.categories() {
             println!("{}", category.name());
         }
 
-        // Зображення посту
-        // Шукаємо url зображення у полі enclosure
-        if let Some(enclosure) = item.enclosure() {
+        /* if let Some(enclosure) = item.enclosure() {
             println!("\n Picture: {}", enclosure.url());
         }
-        // Шукаэмо url зображення у BTreeMap поля extensions
         if !item.extensions().is_empty() {
             if let Some(media) = item.extensions().get("media") {
                 if let Some(content) = media.get("content") {
@@ -98,20 +94,18 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
             }
         }
-        // Шукаэмо url зображення у тексті опису посту
         if let Some(text) = item.description() {
             if let Some(result) = text.find("src=") {
                 let inner = text.get(result + 5..).unwrap();
                 let picture = inner.get(..inner.find("\"").unwrap()).unwrap();
                 println!("\n Picture: {}", picture);
             }
-        }
+        } */
 
-        // Текс опису посту
         println!("\n Text: {:?}\n", item.description());
-        //Дата публікації
+
         println!("Publication date: {:?}\n", item.pub_date());
-        //Шукаємо автора спочатку у полі author, потім у структурі DublinCoreExtension
+
         if let Some(author) = item.author() {
             println!("Author: {:?}\n\n\n", author);
         } else if let Some(author) = item.dublin_core_ext() {
