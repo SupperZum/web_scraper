@@ -66,8 +66,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
         let channel = content.parse::<Channel>().expect("parse error");
 
+        // Отримуэмо останній пост на сайті
         let item = channel.items().get(0).unwrap();
-        dbg!(item);
 
         println!("Website:  {}\n", channel.title());
 
