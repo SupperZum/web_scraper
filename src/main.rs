@@ -20,7 +20,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "https://chitraltimes.com/feed/",
         "https://www.thecorrespondent.pk/feed/",
         "https://www.thefridaytimes.com/feed/",
-        
         "https://dailythepatriot.com/feed/",
         "https://www.lhrtimes.com/feed/",
         "https://dailyqudrat.pk/feed/",
@@ -68,6 +67,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         let channel = content.parse::<Channel>().expect("parse error");
 
         let item = channel.items().get(0).unwrap();
+        dbg!(item);
 
         println!("Website:  {}\n", channel.title());
 
@@ -75,26 +75,41 @@ async fn main() -> Result<(), Box<dyn Error>> {
             "Language: {}\n",
             detect(item.title().unwrap()).unwrap().lang().eng_name()
         );
-        println!(
-            "Last post: {} (link: {})\n",
-            item.title().unwrap(),
-            item.link().unwrap()
-        );
+        println!("Last post: {} \n", item.title().unwrap());
 
         println!("Categories: ");
         for category in item.categories() {
             println!("{}", category.name());
         }
 
+        if let Some(enclosure) = item.enclosure() {
+            println!("\n Picture: {}", enclosure.url());
+        }
+        if !item.extensions().is_empty() {
+            if let Some(media) = item.extensions().get("media") {
+                if let Some(content) = media.get("content") {
+                    if let Some(extension) = content.first() {
+                        println!("\n Picture: {:?}", extension.attrs.get("url"))
+                    }
+                }
+            }
+        }
+        if let Some(text) = item.description() {
+            if let Some(result) = text.find("src=") {
+                let inner = text.get(result + 5..).unwrap();
+                let picture = inner.get(..inner.find("\"").unwrap()).unwrap();
+                println!("\n Picture: {}", picture);
+            }
+        }
+
         println!("\n Text: {:?}\n", item.description());
 
-        if item.author() != None {
-            println!("Author: {:?}\n\n\n", item.author());
-        } else if item.dublin_core_ext() != None {
-            println!(
-                "Author: {:?}\n\n\n",
-                item.dublin_core_ext().unwrap().creators()
-            );
+        println!("Publication date: {:?}\n", item.pub_date());
+
+        if let Some(author) = item.author() {
+            println!("Author: {:?}\n\n\n", author);
+        } else if let Some(author) = item.dublin_core_ext() {
+            println!("Author: {:?}\n\n\n", author.creators());
         }
     }
 
